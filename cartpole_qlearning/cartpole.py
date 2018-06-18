@@ -44,7 +44,7 @@ class CartPoleQLearningAgent:
 
         self._feature_bins = [
             # cart position
-            np.linspace(-4.8, 4.8, self._bin_sizes[0] + 1)[1:-1],
+            np.linspace(-2.4, 2.4, self._bin_sizes[0] + 1)[1:-1],
             # cart velocity
             np.linspace(-3.0, 3.0, self._bin_sizes[1] + 1)[1:-1],
             # angle
@@ -100,9 +100,12 @@ class CartPoleQLearningAgent:
 
         # defining utility as current reward + discount factor multiplied on the best possible
         # reward acting from the next state
+        # the formula is according to information by the following link 
+	# https://dev.to/n1try/cartpole-with-q-learning---first-experiences-with-openai-gym
+
         utility = reward + self.discount_factor * max(self.q[next_state, :])
-        self.q[self.state, self.action] -= \
-            self.learning_rate * (self.q[self.state, self.action] - utility)
+        self.q[self.state, self.action] += \
+            self.learning_rate * (utility - self.q[self.state, self.action])
 
         # ====================================================
 
@@ -275,17 +278,18 @@ def save_history(history, experiment_dir):
 
 def main():
     random_state = 0
-    experiment_dir = "cartpole-qlearning-log"
+    experiment_dir = "cartpole-qlearning-1"
 
     env = gym.make("CartPole-v0")
     env.seed(random_state)
     np.random.seed(random_state)
 
     env.monitor.start(experiment_dir, force=True, resume=False, seed=random_state)
-    episode_history = run_agent(env, verbose=True)   # Set verbose=False to greatly speed up the process.
+    episode_history = run_agent(env, verbose=False)   # Set verbose=False to greatly speed up the process.
     save_history(episode_history, experiment_dir)
     env.monitor.close()
 
 
 if __name__ == "__main__":
     main()
+
