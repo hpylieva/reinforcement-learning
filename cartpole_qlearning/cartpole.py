@@ -72,14 +72,11 @@ class CartPoleQLearningAgent:
 
     def begin_episode(self, observation):
         self.state = self._build_state(observation)
-
         # Reduce exploration over time.
         self.exploration_rate *= self.exploration_decay_rate
-
         # =============== TODO: Your code here ===============
         #   Based on the Q-Table, get the best action for our current state.
-
-        return np.random.randint(self._num_actions)
+        return np.argmax(self.q[self.state])
         # ====================================================
 
     def act(self, observation, reward):
@@ -91,16 +88,22 @@ class CartPoleQLearningAgent:
         # =============== TODO: Your code here ===============
         #   If we choose exploration (enable_exploration == True), we perform a random action.
         #   If we choose exploitation, we perform the best possible action for this state.
-
-        next_action = np.random.randint(0, self._num_actions)
+        if enable_exploration:
+            next_action = np.random.randint(0, self._num_actions)
+        else:
+            next_action = np.argmax(self.q[next_state])
         # ====================================================
-
         # =============== TODO: Your code here ===============
         #   We have received a reward from our previous step, and we know our future
         #   state and what action to perform next.
         #   Now, recalculate Q[state, action] in the Q-Table using the update formula.
 
-        self.q[0, 0] = 0
+        # defining utility as current reward + discount factor multiplied on the best possible
+        # reward acting from the next state
+        utility = reward + self.discount_factor * max(self.q[next_state, :])
+        self.q[self.state, self.action] -= \
+            self.learning_rate * (self.q[self.state, self.action] - utility)
+
         # ====================================================
 
         self.state = next_state
@@ -208,7 +211,10 @@ def run_agent(env, verbose=False):
     #   would be reasonable in this environment.
 
     agent = CartPoleQLearningAgent(
-
+        learning_rate=0.1,
+        discount_factor=0.9,
+        exploration_rate=0.2,
+        exploration_decay_rate=0.99
     )
     # ====================================================
 
@@ -269,7 +275,7 @@ def save_history(history, experiment_dir):
 
 def main():
     random_state = 0
-    experiment_dir = "cartpole-qlearning-1"
+    experiment_dir = "cartpole-qlearning-log"
 
     env = gym.make("CartPole-v0")
     env.seed(random_state)
