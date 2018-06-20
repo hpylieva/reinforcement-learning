@@ -38,7 +38,7 @@ class CartPoleQLearningAgent:
         #
         #   Hint: use np.linspace, np.digitize, pd.cut or similar functions.
 
-        self._bin_sizes = [5, 5, 6, 5]
+        self._bin_sizes = [3, 3, 6, 5]
         self._max_bin_size = max(self._bin_sizes)
         self._num_bins = self._max_bin_size ** len(self._bin_sizes)
 
@@ -53,7 +53,6 @@ class CartPoleQLearningAgent:
             np.linspace(-3.0, 3.0, self._bin_sizes[3] + 1)[1:-1]
         ]
 
-        # self._sum_bins = sum(len(bin) for bin in self._feature_bins)
         self._sum_states = (self._max_bin_size + 1) ** len(self._feature_bins)
         self.q = np.zeros((self._sum_states, self._num_actions))
 
